@@ -8,7 +8,7 @@
 
 use std::fmt;
 
-pub struct DataPoint<T> {
+pub struct DataPoint<T: fmt::Display> {
     measurement: String,
     tag_set: Vec<(String, String)>,
     field_set: Vec<(String, T)>,
@@ -54,7 +54,7 @@ mod tests {
                 ("location".to_string(), "us-midwest".to_string()),
                 ("season".to_string(), "summer".to_string()),
             ],
-            field_set: vec![("temperature".to_string(), "82".to_string())],
+            field_set: vec![("temperature".to_string(), 82)],
             timestamp: 1465839830100400200
         };
 
