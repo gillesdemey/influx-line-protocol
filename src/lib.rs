@@ -6,31 +6,36 @@
 // |measurement|,tag_set| |field_set| |timestamp|
 // +-----------+--------+-+---------+-+---------+
 
-pub struct DataPoint {
+use std::fmt;
+
+pub struct DataPoint<T> {
     measurement: String,
     tag_set: Vec<(String, String)>,
-    field_set: Vec<(String, String)>,
+    field_set: Vec<(String, T)>,
     timestamp: u64
 }
 
-pub fn encode (dp: DataPoint) -> String {
-    let tags: Vec<String> = dp.tag_set
-        .iter()
-        .map(|t| format!("{}={}", t.0, t.1))
-        .collect();
+impl<T: fmt::Display> DataPoint<T> {
+    pub fn encode (&self) -> String {
+        let tags: Vec<String> = self.tag_set
+            .iter()
+            .map(|t| format!("{}={}", t.0, t.1))
+            .collect();
 
-    let fields: Vec<String> = dp.field_set
-        .iter()
-        .map(|t| format!("{}={}", t.0, t.1))
-        .collect();
+        let fields: Vec<String> = self.field_set
+            .iter()
+            .map(|t| format!("{}={}", t.0, t.1))
+            .collect();
 
-    format!("{},{} {} {}",
-        dp.measurement,
-        tags.join(","),
-        fields.join(","),
-        dp.timestamp
-    )
+        format!("{},{} {} {}",
+            self.measurement,
+            tags.join(","),
+            fields.join(","),
+            self.timestamp
+        )
+    }
 }
+
 
 // pub fn decode (dp: String) -> DataPoint {
 //
@@ -39,7 +44,6 @@ pub fn encode (dp: DataPoint) -> String {
 
 #[cfg(test)]
 mod tests {
-    use encode;
     use DataPoint;
 
     #[test]
@@ -51,12 +55,12 @@ mod tests {
                 ("season".to_string(), "summer".to_string()),
             ],
             field_set: vec![("temperature".to_string(), "82".to_string())],
-            timestamp: 1513541154228
+            timestamp: 1465839830100400200
         };
 
         assert_eq!(
-            encode(dp),
-            "weather,location=us-midwest,season=summer temperature=82 1513541154228".to_string()
+            dp.encode(),
+            "weather,location=us-midwest,season=summer temperature=82 1465839830100400200".to_string()
         );
     }
 }
