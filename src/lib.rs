@@ -15,7 +15,7 @@ pub struct DataPoint<T: fmt::Display> {
     timestamp: u64
 }
 
-impl<T: fmt::Display> DataPoint<T> {
+impl<T> DataPoint<T> where T: fmt::Display {
     pub fn encode (&self) -> String {
         let tags: Vec<String> = self.tag_set
             .iter()
@@ -34,13 +34,21 @@ impl<T: fmt::Display> DataPoint<T> {
             self.timestamp
         )
     }
+
+    fn from (s: &str) -> DataPoint<T> {
+        DataPoint {
+            measurement: String::from("weather"),
+            tag_set: vec![
+                (String::from("location"), String::from("us-midwest")),
+                (String::from("season"), String::from("summer")),
+            ],
+            field_set: vec![
+                (String::from("temperature"), 82)
+            ],
+            timestamp: 1465839830100400200
+        }
+    }
 }
-
-
-// pub fn decode (dp: String) -> DataPoint {
-//
-// }
-
 
 #[cfg(test)]
 mod tests {
@@ -49,18 +57,33 @@ mod tests {
     #[test]
     fn correct_encoding() {
         let dp = DataPoint {
-            measurement: "weather".to_string(),
+            measurement: String::from("weather"),
             tag_set: vec![
-                ("location".to_string(), "us-midwest".to_string()),
-                ("season".to_string(), "summer".to_string()),
+                (String::from("location"), String::from("us-midwest")),
+                (String::from("season"), String::from("summer")),
             ],
-            field_set: vec![("temperature".to_string(), 82)],
+            field_set: vec![(String::from("temperature"), 82)],
             timestamp: 1465839830100400200
         };
 
-        assert_eq!(
-            dp.encode(),
-            "weather,location=us-midwest,season=summer temperature=82 1465839830100400200".to_string()
-        );
+        let line = String::from("weather,location=us-midwest,season=summer temperature=82 1465839830100400200");
+
+        assert_eq!(dp.encode(), line);
+    }
+
+    fn correct_decoding() {
+        let line = "weather,location=us-midwest,season=summer temperature=82 1465839830100400200";
+
+        let dp = DataPoint {
+            measurement: String::from("weather"),
+            tag_set: vec![
+                (String::from("location"), String::from("us-midwest")),
+                (String::from("season"), String::from("summer")),
+            ],
+            field_set: vec![(String::from("temperature"), 82)],
+            timestamp: 1465839830100400200
+        };
+
+        assert_eq!(DataPoint::from(line).measurement, String::from("weather"));
     }
 }
